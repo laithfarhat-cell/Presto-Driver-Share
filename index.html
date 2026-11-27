@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>منظومة عروض وساعات المدن</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0d0d0f; --card:#17181c; --card2:#1f2126; --line:#2c2f36;
+  --txt:#f3f4f6; --muted:#9aa0aa;
+  --orange:#ff8a00; --orange2:#ffb84d; --od:#e06f00;
+  --ok:#22c55e; --err:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+::selection{background:var(--orange);color:#000}
+body{font-family:Calibri,"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);font-size:15px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#101114}
+::-webkit-scrollbar-thumb{background:#3a3d45;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:var(--orange)}
+
+header{background:linear-gradient(135deg,#000000,#1c1204);color:#fff;padding:14px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:0;z-index:20;border-bottom:3px solid var(--orange);box-shadow:0 4px 18px rgba(255,138,0,.18)}
+header h1{font-size:20px;white-space:nowrap}
+header h1 b{color:var(--orange)}
+.spacer{flex:1}
+header input{padding:8px 12px;border:1px solid #3a3d45;border-radius:8px;font-family:inherit;font-size:14px;min-width:140px;background:#26282e;color:var(--txt)}
+header input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,138,0,.2)}
+input::placeholder{color:#6b7280}
+
+.btn{border:none;border-radius:8px;padding:9px 16px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-orange{background:var(--orange);color:#000}
+.btn-orange:hover{background:var(--orange2)}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--od));color:#000;font-size:17px;padding:14px 22px;width:100%;box-shadow:0 4px 14px rgba(255,138,0,.3)}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(255,138,0,.45)}
+.btn-amber{background:var(--od);color:#fff;padding:5px 12px;font-size:13px}
+.btn-red{background:var(--err);color:#fff;padding:5px 12px;font-size:13px}
+.btn-ghost{background:#2c2f36;color:var(--txt);border:1px solid #3a3d45}
+.btn-outline{background:transparent;color:var(--orange2);border:1.5px solid var(--orange)}
+.btn-outline:hover{background:rgba(255,138,0,.12)}
+
+.badge{font-size:13px;font-weight:700;padding:5px 12px;border-radius:999px;background:rgba(255,138,0,.18);color:var(--orange2);border:1px solid rgba(255,138,0,.35)}
+.badge.ok{background:rgba(34,197,94,.15);color:#4ade80;border-color:rgba(34,197,94,.4)}
+.badge.warn{background:rgba(255,138,0,.18);color:var(--orange2)}
+.badge.busy{background:rgba(255,184,77,.15);color:var(--orange2)}
+
+main{max-width:1200px;margin:18px auto;padding:0 14px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.card h2{font-size:18px;margin-bottom:14px;color:var(--orange);border-bottom:1px solid var(--line);padding-bottom:10px}
+.field{margin-bottom:14px}
+.field>label{display:block;font-size:14px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-family:inherit;font-size:15px;background:#121317;color:var(--txt)}
+.field input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,138,0,.15)}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1.5px solid #3a3d45;background:#22252b;color:#c8ccd4;border-radius:999px;padding:6px 14px;font-size:14px;cursor:pointer;user-select:none;transition:.12s}
+.chip:hover{border-color:var(--orange)}
+.chip.on{background:var(--orange);border-color:var(--orange);color:#000;font-weight:700}
+.chip.all{border-color:var(--orange);color:var(--orange2);font-weight:700}
+.chip.all.on{background:var(--orange);color:#000}
+.group-title{font-size:13px;font-weight:700;color:var(--muted);margin:10px 0 6px}
+.group-title b{color:var(--orange2)}
+
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:700px){.grid3{grid-template-columns:1fr}}
+
+#pasteZone{border:2px dashed #3a3d45;border-radius:10px;padding:14px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer;background:#121317}
+#pasteZone:hover{border-color:var(--orange)}
+#pasteZone.has{border-color:var(--ok);color:#4ade80;border-style:solid}
+#thumbWrap{margin-top:8px}
+#thumbWrap img{max-height:110px;border-radius:8px;border:1px solid var(--line)}
+
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.stat{flex:1;min-width:120px;background:#121317;border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:center}
+.stat b{display:block;font-size:24px;color:var(--orange)}
+.stat span{font-size:13px;color:var(--muted)}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:#1f2126;color:var(--orange2);padding:9px 8px;text-align:right;white-space:nowrap;border-bottom:2px solid var(--orange)}
+td{padding:9px 8px;border-top:1px solid var(--line);vertical-align:middle;color:#d7dae0}
+tbody tr:hover{background:rgba(255,138,0,.05)}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.p-active{background:rgba(34,197,94,.15);color:#4ade80}
+.p-reduced{background:rgba(255,138,0,.15);color:var(--orange2)}
+.p-stopped{background:rgba(239,68,68,.15);color:#f87171}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+details summary{cursor:pointer;font-weight:700;color:var(--orange2);margin:16px 0 8px;font-size:15px}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:60;padding:26px 12px;overflow:auto}
+.modal.open{display:flex;align-items:flex-start;justify-content:center}
+.modal-box{background:var(--card);border:1px solid #3a3d45;border-top:4px solid var(--orange);border-radius:14px;max-width:780px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-box h2{color:var(--orange);font-size:19px;margin-bottom:6px}
+.modal-box label{display:block;font-size:14px;font-weight:700;color:var(--muted);margin:12px 0 5px}
+.modal-box input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-family:inherit;font-size:14px;background:#121317;color:var(--txt)}
+.modal-box input:focus{outline:none;border-color:var(--orange)}
+.modal-box input[readonly]{background:#1a1c20;color:var(--orange2)}
+.modal-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+
+pre{direction:ltr;text-align:left;background:#0a0a0c;border:1px solid var(--line);color:#ffd9a8;padding:14px;border-radius:10px;max-height:250px;overflow:auto;font:12px/1.65 Consolas,Menlo,monospace;white-space:pre;margin-top:10px}
+
+#toast{position:fixed;bottom:18px;right:50%;transform:translateX(50%);background:#1a1c20;color:#fff;border:1px solid var(--orange);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:99;max-width:92%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+#imgViewer{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:100;cursor:zoom-out}
+#imgViewer img{max-width:94%;max-height:94%;border-radius:8px;border:2px solid var(--orange)}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏙️ منظومة <b>عروض وساعات المدن</b></h1>
+  <div class="spacer"></div>
+  <input id="supervisorInput" placeholder="👤 اسم المشرف">
+  <input id="quickSheetName" placeholder="📑 اسم الورقة + إدخال" title="اكتب اسم الورقة الجديدة واضغط إدخال للانتقال إليها فوراً">
+  <span class="badge" id="syncBadge">…</span>
+  <button class="btn btn-orange" id="settingsBtn">⚙️ إعدادات الربط</button>
+</header>
+
+<main>
+  <!-- ═══ شاشة الإدخال السريعة ═══ -->
+  <section class="card">
+    <h2>➕ تسجيل وتفعيل عرض جديد</h2>
+    <div class="field">
+      <label>المناطق المستهدفة</label>
+      <div class="group-title"><b>مدينة طرابلس</b> (9 مناطق / هبات)</div>
+      <div class="chips" id="tripoliChips"></div>
+      <div class="group-title"><b>باقي المدن</b></div>
+      <div class="chips" id="cityChips"></div>
+    </div>
+    <div class="grid3">
+      <div class="field">
+        <label>الخدمات (يمكن اختيار أكثر من خدمة)</label>
+        <div class="chips" id="serviceChips"></div>
+      </div>
+      <div class="field">
+        <label>قيمة العرض</label>
+        <input type="number" id="offerValue" inputmode="decimal" placeholder="مثال: 50">
+      </div>
+      <div class="field">
+        <label>عدد السائقين وقت التفعيل</label>
+        <input type="number" id="driversCount" inputmode="numeric" placeholder="اختياري">
+      </div>
+    </div>
+    <div class="field">
+      <label>السبب</label>
+      <input type="text" id="reason" placeholder="مثال: نقص سائقين في الذروة المسائية">
+    </div>
+    <div class="field">
+      <label>لقطة شاشة (توثيق فوري)</label>
+      <div id="pasteZone">📋 انسخ الصورة من أي مكان ثم اضغط <b>Ctrl + V</b> في أي مكان بالشاشة</div>
+      <div id="thumbWrap"></div>
+    </div>
+    <button class="btn btn-primary" id="submitBtn">✅ تطبيق وحفظ في الشيت المعيّن</button>
+  </section>
+
+  <!-- ═══ جدول العروض ═══ -->
+  <section class="card">
+    <h2>📊 العروض الجارية والسجل</h2>
+    <div class="stats" id="stats"></div>
+    <div id="activeWrap"></div>
+    <details id="stoppedDetails">
+      <summary>🗂️ العروض الموقوفة (الأرشيف)</summary>
+      <div id="stoppedWrap"></div>
+    </details>
+  </section>
+</main>
+
+<!-- ═══ نافذة إعدادات الربط ═══ -->
+<div class="modal" id="settingsModal">
+  <div class="modal-box">
+    <h2>⚙️ إعدادات الربط مع Google Sheet</h2>
+    <div class="hint">تُدخل مرة واحدة، ويمكن تغيير رابط الشيت أو الورقة في أي وقت دون لمس الكود.</div>
+    <label>1) رابط ملف Google Sheet</label>
+    <input id="cfgSheetUrl" dir="ltr" placeholder="https://docs.google.com/spreadsheets/d/…">
+    <label>2) اسم الورقة (التبويب) المراد التسجيل فيها</label>
+    <input id="cfgSheetName" placeholder="سجل_العروض">
+    <label>3) معرّف الملف (يُستخرج تلقائياً من الرابط)</label>
+    <input id="cfgSheetId" dir="ltr" readonly>
+    <label>4) رابط Web App (المنتهي بـ /exec)</label>
+    <input id="cfgExecUrl" dir="ltr" placeholder="https://script.google.com/macros/s/…/exec">
+    <div class="modal-btns">
+      <button class="btn btn-orange" id="saveCfg">💾 حفظ الإعدادات والمزامنة الآن</button>
+      <button class="btn btn-outline" id="testCfg">🔌 اختبار الاتصال</button>
+      <button class="btn btn-ghost" id="exportBtn">⬇️ تصدير نسخة احتياطية</button>
+      <button class="btn btn-ghost" id="closeModal">إغلاق</button>
+    </div>
+    <h2 style="margin-top:22px">📄 كود Apps Script (جسر الربط)</h2>
+    <div class="hint">انسخه بالكامل والصقه داخل Extensions ← Apps Script ثم انشره كـ Web app (تنفيذ: Me — الوصول: Anyone).</div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" id="copyScriptBtn">📄 نسخ كود Apps Script بالكامل</button>
+    </div>
+<pre id="scriptCode">// ══════ منظومة عروض وساعات المدن — كود الربط (الصقه بالكامل) ══════
+var HEADERS = ['التاريخ','وقت التفعيل','المشرف','المدينة','المنطقة','رقم المنطقة','الخدمات','قيمة العرض الحالية','القيمة عند التفعيل','عدد السائقين','السبب','عدد التخفيضات','سجل التخفيضات','وقت الإيقاف','إجمالي الساعات','الحالة','صورة مرفقة','معرّف السجل'];
+var COLORS = { active:'#e6f4ea', reduced:'#fef7e0', stopped:'#fce8e6' };
+
+function doGet(e){ return handle(e && e.parameter ? e.parameter : {}); }
+
+function doPost(e){
+  var data = {};
+  try{ data = JSON.parse(e.postData.contents); }catch(err){ data = {}; }
+  return handle(data);
+}
+
+function handle(d){
+  var lock = LockService.getScriptLock();
+  try{ lock.waitLock(25000); }catch(e){}
+  try{
+    if(!d.sheetId){ return out({ok:false, error:'لا يوجد معرّف ملف'}); }
+    var ss = SpreadsheetApp.openById(d.sheetId);
+    var sheetName = d.sheetName || 'سجل_العروض';
+    var sheet = ss.getSheetByName(sheetName);
+    if(!sheet){ sheet = ss.insertSheet(sheetName); }
+    ensureHeaders(sheet);
+    var action = d.action || 'test';
+    if(action === 'test' || action === 'init'){ return out({ok:true, msg:'تم الاتصال', sheet: sheet.getName()}); }
+    if(action === 'create'){ return out(createRows(sheet, d)); }
+    if(action === 'update'){ return out(updateRows(sheet, d)); }
+    return out({ok:false, error:'إجراء غير معروف'});
+  }catch(err){
+    return out({ok:false, error:String(err)});
+  }finally{
+    try{ lock.releaseLock(); }catch(e){}
+  }
+}
+
+function out(obj){
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function ensureHeaders(sheet){
+  if(sheet.getLastRow() === 0){
+    sheet.appendRow(HEADERS);
+    sheet.getRange(1,1,1,HEADERS.length).setFontWeight('bold').setBackground('#111111').setFontColor('#ff8a00').setHorizontalAlignment('center');
+    sheet.setFrozenRows(1);
+    sheet.setRightToLeft(true);
+    sheet.setColumnWidth(13, 240);
+    sheet.setColumnWidth(17, 130);
+  }
+}
+
+function createRows(sheet, d){
+  var existing = existingKeys(sheet);
+  var made = 0;
+  for(var i=0; d.zones.length > i; i++){
+    var z = d.zones[i];
+    var key = d.recordId + '|' + z.name;
+    if(existing[key]){ continue; }
+    sheet.appendRow([ d.date, d.startTime, d.supervisor, z.city, z.name, z.id || '—',
+      d.services.join(' + '), d.value, d.originalValue, d.drivers || '', d.reason || '',
+      0, '', '', '', 'نشط', d.image ? '📎' : '', d.recordId ]);
+    var row = sheet.getLastRow();
+    sheet.getRange(row,1,1,HEADERS.length).setBackground(COLORS.active);
+    if(d.image){
+      try{
+        var blob = Utilities.newBlob(Utilities.base64Decode(d.image), 'image/jpeg', 'offer.jpg');
+        sheet.setRowHeight(row, 95);
+        sheet.insertImage(blob, 17, row);
+      }catch(imgErr){}
+    }
+    made++;
+  }
+  return {ok:true, created:made};
+}
+
+function existingKeys(sheet){
+  var map = {};
+  var last = sheet.getLastRow();
+  if(2 > last){ return map; }
+  var ids = sheet.getRange(2,18,last-1,1).getValues();
+  var zones = sheet.getRange(2,5,last-1,1).getValues();
+  for(var i=0; ids.length > i; i++){ map[ids[i][0] + '|' + zones[i][0]] = true; }
+  return map;
+}
+
+function updateRows(sheet, d){
+  var last = sheet.getLastRow();
+  var updated = 0;
+  if(2 > last){ return {ok:true, updated:0}; }
+  var ids = sheet.getRange(2,18,last-1,1).getValues();
+  for(var i=0; ids.length > i; i++){
+    if(String(ids[i][0]) === String(d.recordId)){
+      var row = i + 2;
+      sheet.getRange(row, 8).setValue(d.value);
+      sheet.getRange(row, 12).setValue(d.reductionsCount);
+      sheet.getRange(row, 13).setValue(d.reductionsLog || '');
+      sheet.getRange(row, 14).setValue(d.stopTime || '');
+      sheet.getRange(row, 15).setValue(d.totalHours || '');
+      sheet.getRange(row, 16).setValue(d.statusText);
+      sheet.getRange(row,1,1,HEADERS.length).setBackground(COLORS[d.statusKey] || COLORS.active);
+      updated++;
+    }
+  }
+  return {ok:true, updated:updated};
+}</pre>
+  </div>
+</div>
+
+<!-- ═══ نافذة التخفيض ═══ -->
+<div class="modal" id="reduceModal">
+  <div class="modal-box" style="max-width:420px">
+    <h2>🔻 تخفيض قيمة العرض</h2>
+    <div id="reduceInfo" class="hint" style="margin:8px 0"></div>
+    <label>القيمة الجديدة بعد التخفيض</label>
+    <input type="number" id="reduceValue" inputmode="decimal">
+    <div class="modal-btns">
+      <button class="btn btn-amber" id="reduceConfirm">تأكيد التخفيض</button>
+      <button class="btn btn-ghost" id="reduceCancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="imgViewer"><img id="imgViewerImg"></div>
+
+<script>
+/* ══════════ بيانات المناطق المعتمدة ══════════ */
+const TRIPOLI = [
+  {id:13,name:'منطقة حي الاندلس',city:'مدينة طرابلس'},
+  {id:25,name:'منطقة تاجوراء',city:'مدينة طرابلس'},
+  {id:27,name:'منطقة عين زارة',city:'مدينة طرابلس'},
+  {id:28,name:'منطقة وسط طرابلس',city:'مدينة طرابلس'},
+  {id:29,name:'منطقة جنزور والسراج',city:'مدينة طرابلس'},
+  {id:30,name:'منطقة طريق المطار',city:'مدينة طرابلس'},
+  {id:43,name:'منطقة قصر بن غشير',city:'مدينة طرابلس'},
+  {id:44,name:'منطقة ورشفانة',city:'مدينة طرابلس'},
+  {id:56,name:'منطقة وادي الربيع',city:'مدينة طرابلس'}
+];
+const CITIES = [
+  {id:32,name:'منطقة بنغازي',city:'مدينة بنغازي'},
+  {id:34,name:'منطقة مصراتة',city:'مدينة مصراتة'},
+  {id:35,name:'منطقة زليتن',city:'مدينة زليتن'},
+  {id:null,name:'صبراته - صرمان',city:'صبراته - صرمان'},
+  {id:null,name:'منطقة اجدابيا',city:'مدينة اجدابيا'},
+  {id:null,name:'غريان',city:'مدينة غريان'},
+  {id:null,name:'منطقة سرت',city:'مدينة سرت'},
+  {id:null,name:'منطقة طبرق',city:'مدينة طبرق'},
+  {id:null,name:'البيضاء - شحات',city:'مدينة البيضاء - شحات'},
+  {id:null,name:'منطقة درنة',city:'مدينة درنة'},
+  {id:null,name:'منطقة الخمس',city:'مدينة الخُمس'},
+  {id:null,name:'منطقة سبها',city:'مدينة سبها'},
+  {id:null,name:'منطقة زوارة',city:'زوارة - رقدالين - الجميل'},
+  {id:null,name:'منطقة الجميل - رقدالين',city:'زوارة - رقدالين - الجميل'},
+  {id:null,name:'منطقة بني وليد',city:'مدينة بني وليد'}
+];
+const ALL_ZONES = TRIPOLI.concat(CITIES);
+const SERVICES = ['إيت','شوب','جت'];
+const zoneByName = {}; ALL_ZONES.forEach(z=>zoneByName[z.name]=z);
+
+/* ══════════ الحالة والتخزين المحلي ══════════ */
+const LS_KEY = 'offersSystem_v1';
+let state = null;
+try{ state = JSON.parse(localStorage.getItem(LS_KEY)); }catch(e){}
+if(!state || !state.records){
+  state = { settings:{sheetUrl:'',sheetId:'',sheetName:'سجل_العروض',execUrl:''}, records:[], queue:[], supervisor:'' };
+}
+const selZones = new Set(), selServices = new Set();
+let draftImage = null, flushing = false, reduceTarget = null;
+
+function persist(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){
+    let stripped=false;
+    state.records.forEach(r=>{ if(r.status==='stopped' && r.image){ r.image=null; r.imageThumb=null; stripped=true; } });
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); if(stripped) toast('⚠️ مساحة المتصفح ممتلئة — حُذفت صور الأرشيف القديمة','warn'); }
+    catch(e2){ toast('❌ مساحة التخزين ممتلئة — صدّر نسخة احتياطية من الإعدادات','err'); }
+  }
+}
+
+/* ══════════ أدوات مساعدة ══════════ */
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const fmtDate = d => d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate());
+const fmtTime = d => pad(d.getHours())+':'+pad(d.getMinutes());
+const rid = () => 'R'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const statusTxt = s => s==='active'?'نشط':(s==='reduced'?'مخفّض':'موقوف');
+const hoursBetween = (a,b) => Math.round((new Date(b)-new Date(a))/36000)/100;
+function elapsedTxt(start){
+  const ms = Date.now()-new Date(start).getTime(); if(ms<0) return '—';
+  const h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);
+  return h>0 ? h+'س '+m+'د' : m+' دقيقة';
+}
+function toast(msg,type){
+  const t=$('toast'); t.textContent=msg; t.style.display='block';
+  t.style.borderColor = type==='err' ? '#ef4444' : '#ff8a00';
+  clearTimeout(t._x); t._x=setTimeout(()=>t.style.display='none',3800);
+}
+function extractId(u){
+  const m=(u||'').match(/\/d\/([a-zA-Z0-9-_]{20,})/);
+  if(m) return m[1];
+  return /^[a-zA-Z0-9-_]{20,}$/.test((u||'').trim()) ? u.trim() : '';
+}
+function downscale(dataUrl,maxW,q){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const s=Math.min(1,maxW/img.width);
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/jpeg',q));
+    };
+    img.src=dataUrl;
+  });
+}
+
+/* ══════════ بناء رقائق الاختيار ══════════ */
+function buildChips(){
+  const tw=$('tripoliChips'); tw.innerHTML='';
+  const all=document.createElement('span');
+  all.className='chip all'; all.id='allTripoliChip'; all.textContent='⭐ كل طرابلس + هباتها';
+  all.onclick=()=>{
+    const every = TRIPOLI.every(z=>selZones.has(z.name));
+    TRIPOLI.forEach(z=> every? selZones.delete(z.name) : selZones.add(z.name));
+    refreshChips();
+  };
+  tw.appendChild(all);
+  TRIPOLI.forEach(z=> tw.appendChild(zoneChip(z)));
+  const cw=$('cityChips'); cw.innerHTML='';
+  CITIES.forEach(z=> cw.appendChild(zoneChip(z)));
+  const sc=$('serviceChips'); sc.innerHTML='';
+  SERVICES.forEach(s=>{
+    const c=document.createElement('span');
+    c.className='chip'; c.textContent=s; c.dataset.name=s;
+    c.onclick=()=>{ selServices.has(s)?selServices.delete(s):selServices.add(s); refreshChips(); };
+    sc.appendChild(c);
+  });
+  refreshChips();
+}
+function zoneChip(z){
+  const c=document.createElement('span');
+  c.className='chip'; c.dataset.name=z.name;
+  c.textContent = z.name + (z.id? ' #'+z.id : '');
+  c.onclick=()=>{ selZones.has(z.name)?selZones.delete(z.name):selZones.add(z.name); refreshChips(); };
+  return c;
+}
+function refreshChips(){
+  document.querySelectorAll('.chip[data-name]').forEach(c=>{
+    const n=c.dataset.name;
+    c.classList.toggle('on', selZones.has(n)||selServices.has(n));
+  });
+  $('allTripoliChip').classList.toggle('on', TRIPOLI.every(z=>selZones.has(z.name)));
+}
+
+/* ══════════ لصق الصور Ctrl+V ══════════ */
+document.addEventListener('paste', e=>{
+  const items=(e.clipboardData&&e.clipboardData.items)||[];
+  for(const it of items){
+    if(it.type && it.type.indexOf('image')===0){
+      e.preventDefault();
+      const rd=new FileReader();
+      rd.onload=async ()=>{
+        draftImage={ full: await downscale(rd.result,1000,.8), thumb: await downscale(rd.result,420,.65) };
+        $('thumbWrap').innerHTML='<img src="'+draftImage.full+'">';
+        $('pasteZone').classList.add('has');
+        $('pasteZone').innerHTML='✅ تم إرفاق لقطة الشاشة — يمكنك لصق صورة أخرى لاستبدالها';
+        toast('📎 تم إرفاق لقطة الشاشة');
+      };
+      rd.readAsDataURL(it.getAsFile());
+      break;
+    }
+  }
+});
+$('pasteZone').onclick=()=>toast('انسخ صورة ثم اضغط Ctrl+V مباشرة');
+
+/* ══════════ إرسال عرض جديد ══════════ */
+$('submitBtn').onclick=()=>{
+  const zones=ALL_ZONES.filter(z=>selZones.has(z.name));
+  const services=SERVICES.filter(s=>selServices.has(s));
+  const value=parseFloat($('offerValue').value);
+  if(!zones.length) return toast('⚠️ حدد منطقة واحدة على الأقل (أو كل طرابلس)','warn');
+  if(!services.length) return toast('⚠️ حدد خدمة واحدة على الأقل','warn');
+  if(isNaN(value)) return toast('⚠️ أدخل قيمة العرض','warn');
+  const now=new Date();
+  const rec={
+    id:rid(), supervisor:state.supervisor||'—', zones, services,
+    value, originalValue:value, reason:$('reason').value.trim(),
+    drivers:parseInt($('driversCount').value)||'',
+    image:draftImage?draftImage.full:null, imageThumb:draftImage?draftImage.thumb:null,
+    status:'active', start:now.toISOString(), reductions:[], stop:null, totalHours:null
+  };
+  state.records.unshift(rec);
+  enqueue(createJob(rec));
+  draftImage=null;
+  selZones.clear(); selServices.clear();
+  $('offerValue').value=''; $('driversCount').value=''; $('reason').value='';
+  $('thumbWrap').innerHTML=''; $('pasteZone').classList.remove('has');
+  $('pasteZone').innerHTML='📋 انسخ الصورة ثم اضغط <b>Ctrl + V</b>';
+  persist(); refreshChips(); renderAll(); flushQueue();
+  toast('✅ تم تفعيل العرض وحفظه');
+};
+
+function createJob(rec){
+  const d=new Date(rec.start);
+  return { action:'create', recordId:rec.id, date:fmtDate(d), startTime:fmtTime(d),
+    supervisor:rec.supervisor, zones:rec.zones, services:rec.services,
+    value:rec.value, originalValue:rec.originalValue, drivers:rec.drivers, reason:rec.reason,
+    image: rec.imageThumb ? rec.imageThumb.split(',')[1] : null };
+}
+function updateJob(rec){
+  const log=rec.reductions.map(x=>fmtTime(new Date(x.time))+' ← من '+x.from+' إلى '+x.to).join(' ؛ ');
+  const sd=rec.stop?new Date(rec.stop):null;
+  return { action:'update', recordId:rec.id, value:rec.value,
+    reductionsCount:rec.reductions.length, reductionsLog:log,
+    stopTime: sd? fmtDate(sd)+' '+fmtTime(sd) : '',
+    totalHours: rec.totalHours||'', statusText:statusTxt(rec.status), statusKey:rec.status };
+}
+
+/* ══════════ التخفيض والإيقاف ══════════ */
+function openReduce(id){
+  reduceTarget=state.records.find(r=>r.id===id);
+  if(!reduceTarget) return;
+  $('reduceInfo').textContent='المناطق: '+reduceTarget.zones.map(z=>z.name).join('، ')+' — القيمة الحالية: '+reduceTarget.value;
+  $('reduceValue').value='';
+  $('reduceModal').classList.add('open');
+}
+$('reduceCancel').onclick=()=>$('reduceModal').classList.remove('open');
+$('reduceConfirm').onclick=()=>{
+  const nv=parseFloat($('reduceValue').value);
+  if(isNaN(nv)) return toast('⚠️ أدخل القيمة الجديدة','warn');
+  reduceTarget.reductions.push({time:new Date().toISOString(), from:reduceTarget.value, to:nv});
+  reduceTarget.value=nv; reduceTarget.status='reduced';
+  enqueue(updateJob(reduceTarget));
+  $('reduceModal').classList.remove('open');
+  persist(); renderAll(); flushQueue();
+  toast('🔻 تم توثيق التخفيض وتحديث الشيت');
+};
+function stopRec(id){
+  const rec=state.records.find(r=>r.id===id);
+  if(!rec) return;
+  if(!confirm('تأكيد إيقاف العرض واحتساب إجمالي الساعات؟')) return;
+  rec.stop=new Date().toISOString();
+  rec.status='stopped';
+  rec.totalHours=hoursBetween(rec.start, rec.stop);
+  enqueue(updateJob(rec));
+  persist(); renderAll(); flushQueue();
+  toast('⏹️ تم الإيقاف — الإجمالي: '+rec.totalHours+' ساعة');
+}
+function viewImg(id){
+  const rec=state.records.find(r=>r.id===id);
+  if(rec&&rec.image){ $('imgViewerImg').src=rec.image; $('imgViewer').style.display='flex'; }
+  else toast('لا توجد صورة محفوظة لهذا العرض','warn');
+}
+$('imgViewer').onclick=()=>$('imgViewer').style.display='none';
+
+/* ══════════ العرض والجداول ══════════ */
+function zoneLabel(r){
+  if(r.zones.length>3) return '⭐ كل طرابلس ('+r.zones.length+' مناطق)';
+  return r.zones.map(z=>esc(z.name)).join('، ');
+}
+function rowHtml(r){
+  const durCell = r.status==='stopped'
+    ? '<b style="color:#ff8a00">'+r.totalHours+' ساعة</b>'
+    : '<span data-dur="'+r.id+'">'+elapsedTxt(r.start)+'</span>';
+  const valCell = r.reductions.length
+    ? '<b>'+r.value+'</b> <span class="hint">(كانت '+r.originalValue+' — '+r.reductions.length+' تخفيض)</span>'
+    : '<b>'+r.value+'</b>';
+  const actions = r.status==='stopped'
+    ? (r.image?'<button class="btn btn-outline" style="padding:5px 10px;font-size:12px" onclick="viewImg(\''+r.id+'\')">🔍 صورة</button>':'—')
+    : '<button class="btn btn-amber" onclick="openReduce(\''+r.id+'\')">🔻 تخفيض</button>'
+      +'<button class="btn btn-red" onclick="stopRec(\''+r.id+'\')">⏹️ إيقاف</button>'
+      +(r.image?'<button class="btn btn-outline" style="padding:5px 10px;font-size:12px" onclick="viewImg(\''+r.id+'\')">🔍</button>':'');
+  const sd=new Date(r.start);
+  return '<tr><td>'+zoneLabel(r)+'</td><td>'+r.zones.map(z=>esc(z.city)).filter((v,i,a)=>a.indexOf(v)===i).join('، ')+'</td>'
+    +'<td>'+r.services.join(' + ')+'</td><td>'+valCell+'</td><td>'+esc(r.supervisor)+'</td>'
+    +'<td style="white-space:nowrap">'+fmtDate(sd)+' '+fmtTime(sd)+'</td><td>'+durCell+'</td>'
+    +'<td><span class="pill p-'+r.status+'">'+statusTxt(r.status)+'</span></td>'
+    +'<td><div class="row-actions">'+actions+'</div></td></tr>';
+}
+function tableHtml(list){
+  if(!list.length) return '<div class="hint" style="padding:10px">لا توجد عروض هنا بعد.</div>';
+  return '<div style="overflow-x:auto"><table><thead><tr><th>المنطقة</th><th>المدينة</th><th>الخدمات</th><th>القيمة</th><th>المشرف</th><th>البداية</th><th>المدة</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>'
+    + list.map(rowHtml).join('') + '</tbody></table></div>';
+}
+function renderAll(){
+  const active=state.records.filter(r=>r.status!=='stopped');
+  const stopped=state.records.filter(r=>r.status==='stopped');
+  $('activeWrap').innerHTML=tableHtml(active);
+  $('stoppedWrap').innerHTML=tableHtml(stopped);
+  $('stoppedDetails').querySelector('summary').textContent='🗂️ العروض الموقوفة ('+stopped.length+')';
+  const today=fmtDate(new Date());
+  const stoppedToday=stopped.filter(r=>fmtDate(new Date(r.stop))===today);
+  const sumToday=stoppedToday.reduce((a,r)=>a+(r.totalHours||0),0);
+  $('stats').innerHTML=
+    '<div class="stat"><b>'+state.records.filter(r=>r.status==='active').length+'</b><span>عرض نشط الآن</span></div>'
+    +'<div class="stat"><b>'+state.records.filter(r=>r.status==='reduced').length+'</b><span>عرض مخفّض</span></div>'
+    +'<div class="stat"><b>'+stoppedToday.length+'</b><span>أُوقف اليوم</span></div>'
+    +'<div class="stat"><b>'+Math.round(sumToday*100)/100+'</b><span>ساعات موقوفة اليوم</span></div>';
+  renderBadge();
+}
+function updateDurations(){
+  document.querySelectorAll('[data-dur]').forEach(el=>{
+    const r=state.records.find(x=>x.id===el.dataset.dur);
+    if(r) el.textContent=elapsedTxt(r.start);
+  });
+}
+function renderBadge(txt,cls){
+  const b=$('syncBadge');
+  if(txt){ b.textContent=txt; b.className='badge '+(cls||''); return; }
+  if(!state.settings.execUrl||!state.settings.sheetId){ b.textContent='⚠️ غير مرتبط'; b.className='badge warn'; }
+  else if(state.queue.length){ b.textContent='🔄 في الانتظار: '+state.queue.length; b.className='badge busy'; }
+  else { b.textContent='✅ متصل ومتزامن'; b.className='badge ok'; }
+}
+
+/* ══════════ المزامنة مع Google Sheet ══════════ */
+function enqueue(job){
+  state.queue=state.queue.filter(j=>!(j.recordId===job.recordId && j.action===job.action));
+  state.queue.push(job);
+  renderBadge();
+}
+function postJob(job){
+  job.sheetId=state.settings.sheetId;
+  job.sheetName=state.settings.sheetName;
+  return fetch(state.settings.execUrl,{method:'POST',mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(job)});
+}
+async function flushQueue(){
+  if(flushing) return;
+  if(!state.settings.execUrl||!state.settings.sheetId){ renderBadge(); return; }
+  flushing=true;
+  renderBadge('🔄 جارٍ المزامنة…','busy');
+  const remaining=[];
+  for(const job of state.queue){
+    try{ await postJob(job); }catch(e){ remaining.push(job); }
+  }
+  state.queue=remaining; flushing=false;
+  persist(); renderBadge();
+}
+setInterval(()=>{ updateDurations(); if(state.queue.length) flushQueue(); },30000);
+window.addEventListener('online',flushQueue);
+
+/* ══════════ نافذة الإعدادات ══════════ */
+$('settingsBtn').onclick=()=>{
+  $('cfgSheetUrl').value=state.settings.sheetUrl;
+  $('cfgSheetName').value=state.settings.sheetName;
+  $('cfgSheetId').value=state.settings.sheetId;
+  $('cfgExecUrl').value=state.settings.execUrl;
+  $('settingsModal').classList.add('open');
+};
+$('closeModal').onclick=()=>$('settingsModal').classList.remove('open');
+$('cfgSheetUrl').addEventListener('input',()=>{ $('cfgSheetId').value=extractId($('cfgSheetUrl').value); });
+$('saveCfg').onclick=()=>{
+  state.settings.sheetUrl=$('cfgSheetUrl').value.trim();
+  state.settings.sheetId=$('cfgSheetId').value.trim();
+  state.settings.sheetName=$('cfgSheetName').value.trim()||'سجل_العروض';
+  state.settings.execUrl=$('cfgExecUrl').value.trim();
+  $('quickSheetName').value=state.settings.sheetName;
+  if(state.settings.execUrl && state.settings.execUrl.indexOf('/exec')===-1)
+    toast('⚠️ تنبيه: رابط Web App يجب أن ينتهي بـ /exec','warn');
+  persist(); enqueue({action:'init'}); flushQueue();
+  toast('💾 تم حفظ الإعدادات — بدأت المزامنة');
+};
+$('testCfg').onclick=async ()=>{
+  const s=state.settings;
+  if(!s.execUrl||!s.sheetId) return toast('⚠️ أكمل الحقول واحفظها أولاً','warn');
+  try{
+    const u=s.execUrl+'?action=test&sheetId='+encodeURIComponent(s.sheetId)+'&sheetName='+encodeURIComponent(s.sheetName);
+    const j=await (await fetch(u)).json();
+    if(j.ok){ toast('✅ الاتصال ناجح — الورقة: '+(j.sheet||'')); return; }
+    throw 0;
+  }catch(e){
+    try{ await postJob({action:'init'});
+      toast('⚠️ تعذّرت القراءة التلقائية (قيود المتصفح) — أُرسل طلب تهيئة، افتح الشيت وتأكد من ظهور الورقة وعناوينها','warn');
+    }catch(e2){ toast('❌ فشل الاتصال — تأكد من الرابط ومن النشر بصلاحية Anyone','err'); }
+  }
+};
+$('copyScriptBtn').onclick=async ()=>{
+  const txt=$('scriptCode').textContent;
+  try{ await navigator.clipboard.writeText(txt); }
+  catch(e){
+    const ta=document.createElement('textarea'); ta.value=txt;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  toast('📄 تم نسخ كود Apps Script بالكامل — الصقه في صفحة السكربت');
+};
+$('exportBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='نسخة-احتياطية-عروض-'+fmtDate(new Date())+'.json'; a.click();
+};
+
+/* ══════════ الشريط العلوي ══════════ */
+$('supervisorInput').value=state.supervisor||'';
+$('supervisorInput').addEventListener('input',()=>{ state.supervisor=$('supervisorInput').value.trim(); persist(); });
+$('quickSheetName').value=state.settings.sheetName;
+$('quickSheetName').addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  const v=$('quickSheetName').value.trim(); if(!v) return;
+  state.settings.sheetName=v; persist();
+  enqueue({action:'init'}); flushQueue();
+  toast('📑 سيتم التسجيل الآن في ورقة: '+v);
+});
+
+/* ══════════ تشغيل ══════════ */
+buildChips(); renderAll(); flushQueue();
+</script>
+</body>
+</html>
